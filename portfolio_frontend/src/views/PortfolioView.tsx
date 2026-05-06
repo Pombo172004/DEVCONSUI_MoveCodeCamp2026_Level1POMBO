@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react"
-import { MAINNET_PORTFOLIO_ID } from "../constants"
+import { MAINNET_PORTFOLIO_ID, TESTNET_PORTFOLIO_ID } from "../constants"
 
 // ============================================================================
 // CUSTOM HOOK FOR DYNAMIC META TAGS
@@ -66,19 +66,20 @@ const useMetaTags = (metadata: {
 // PORTFOLIO DATA CONFIGURATION
 // ============================================================================
 const defaultPortfolioData = {
-  name: "LADY DIANE BAUZON CASILANG",
-  course: "BS in Information Technology",
-  school: "FEU Institute of Technology",
-  about: "I am a fourth-year IT student and freelance designer who integrates technical troubleshooting with creative insight to deliver innovative, efficient solutions.",
+  name: "Christian Dave E. Pombo",
+  course: "Bachelor of Science in Information Technology",
+  school: "Bukidnon State University",
+  about: "I am a good student.",
   skills: [
-    "Graphic Design",
-    "UI / UX Design",
-    "Project Management",
-    "Full Stack Development",
-    "Web & App Development"
+    "Programming",
+    "Web Developer",
+    "Networking",
+    "Basketball",
+    "PHP",
+    "Laravel"
   ],
-  linkedin: "https://www.linkedin.com/in/ldcasilang/",
-  github: "https://github.com/ldcasilang",
+  linkedin: "https://www.linkedin.com/in/christian-dave-pombo-a514b0408/",
+  github: "https://github.com/Pombo172004",
 }
 
 // Network configuration
@@ -99,15 +100,18 @@ const PortfolioView = () => {
   // ==========================================================================
   // STATE MANAGEMENT
   // ==========================================================================
-  const objectId = MAINNET_PORTFOLIO_ID;
+  const hasMainnetPortfolio = MAINNET_PORTFOLIO_ID && MAINNET_PORTFOLIO_ID !== "0x0";
+  const objectId = hasMainnetPortfolio ? MAINNET_PORTFOLIO_ID : TESTNET_PORTFOLIO_ID;
   
-  // Network state - default to testnet, can be changed if needed
-  const [currentNetwork, setCurrentNetwork] = useState<"testnet" | "mainnet">("mainnet");
+  // Default to whichever network has a configured portfolio object.
+  const [currentNetwork] = useState<"testnet" | "mainnet">(
+    hasMainnetPortfolio ? "mainnet" : "testnet"
+  );
   
   const [portfolioData, setPortfolioData] = useState(defaultPortfolioData);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  const [transactionId, setTransactionId] = useState(""); // NEW: Store transaction ID
+  const [transactionId, setTransactionId] = useState("");
 
   // ==========================================================================
   // DYNAMIC META TAGS
@@ -150,7 +154,7 @@ const PortfolioView = () => {
                 {
                   showContent: true,
                   showOwner: true,
-                  showPreviousTransaction: true, // This shows the transaction ID
+              showPreviousTransaction: true,
                   showStorageRebate: true,
                   showDisplay: true,
                   showBcs: false,
@@ -168,7 +172,6 @@ const PortfolioView = () => {
         }
         
         if (result.result?.data) {
-          // Store the transaction ID from the response
           if (result.result.data.previousTransaction) {
             setTransactionId(result.result.data.previousTransaction);
           }
@@ -194,7 +197,7 @@ const PortfolioView = () => {
           throw new Error("No data returned from blockchain");
         }
       } catch (err) {
-        setError(`Note: Using default data (blockchain fetch failed: ${err instanceof Error ? err.message : 'Unknown error'})`);
+        setError(`Note: Using fallback data because blockchain fetch failed on ${network.name}: ${err instanceof Error ? err.message : 'Unknown error'}`);
       } finally {
         setIsLoading(false);
       }
